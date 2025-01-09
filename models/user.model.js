@@ -10,8 +10,16 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String },
     role: { type: String, enum: ["user", "admin"], default: "user" },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true }
 );
+
+userSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
+});
 
 const User = mongoose.model("User", userSchema);
 export default User;

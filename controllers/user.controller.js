@@ -1,12 +1,12 @@
-import User from "../models/user.js";
-import uploadImage from "../utils/uploadImage.js";
+import User from "../models/user.model.js";
+import upload from "../utils/upload.js";
 
 /**
  * @desc Upload user avatar
  * @route /api/users/avatar
  * @method POST
  */
-export const uploadAvatar = uploadImage.single("avatar");
+export const uploadAvatar = upload.single("avatar");
 
 /**
  * @desc Update user avatar

@@ -1,7 +1,8 @@
-import Product from "../models/product.js";
-import Category from "../models/category.js";
+import mongoose from "mongoose";
+
+import Product from "../models/product.model.js";
+import Category from "../models/category.model.js";
 import { productValidationSchema } from "../schemas/product.js";
-import uploadImage from '../utils/uploadImage.js';
 
 /**
  * @desc Create a new product
@@ -9,11 +10,12 @@ import uploadImage from '../utils/uploadImage.js';
  * @method POST
  */
 export const create = async (req, res) => {
-  const { name, description, price, category, quantity, slug } = req.body;
+  const { name, description, price, category, stock } = req.body;
+  console.log(req.body);
 
   try {
     const { error } = productValidationSchema.validate(
-      { name, description },
+      { name, description, price, category, stock },
       { abortEarly: false }
     );
     if (error) {
@@ -27,8 +29,7 @@ export const create = async (req, res) => {
       description,
       price,
       category,
-      quantity,
-      slug,
+      stock,
       images: req.files ? req.files.map((file) => file.path) : [],
     });
 
@@ -46,32 +47,73 @@ export const create = async (req, res) => {
 };
 
 /**
- * @desc Upload product images
- * @route /api/products/upload
- * @method POST
- */
-export const uploadImages = uploadImage.array("images", 5);
-
-/**
- * @desc Get all products (with pagination and category name)
- * @route /api/products?page=1&limit=10
- * @method GET
+ * @desc Get all products (with pagination, category filter, search, sort, and price range filter)
+ * @route GET /api/products?page=&limit=&search=&sort=price&minPrice=&maxPrice=&category=
+ * @access Public
  */
 export const list = async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const {
+    page = 1,
+    limit = 9,
+    search = "",
+    sort = "",
+    minPrice,
+    maxPrice,
+    category,
+  } = req.query;
 
   try {
-    const products = await Product.find()
+    // Create a query object for filters
+    let query = {};
+
+    // Search by product name
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    // Filter by price range
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+
+    // Filter by category
+    if (category) {
+      query.category = category;
+    }
+
+    // Sorting options
+    let sortOptions = {};
+    if (sort === "price") {
+      sortOptions.price = 1; // Sort by price (ascending)
+    } else if (sort === "-price") {
+      sortOptions.price = -1; // Sort by price (descending)
+    } else if (sort === "name") {
+      sortOptions.name = 1; // Sort by name (A-Z)
+    } else if (sort === "-name") {
+      sortOptions.name = -1; // Sort by name (Z-A)
+    } else if (sort === "date") {
+      sortOptions.createdAt = -1; // Sort by date (newest first)
+    }
+
+    // Fetch products with filters, pagination, and sorting
+    const products = await Product.find(query)
+      .sort(sortOptions)
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("category", "name");
 
-    const totalProducts = await Product.countDocuments();
+    // Count total products based on the query
+    const totalProducts = await Product.countDocuments(query);
+
+    // Response
     res.status(200).json({
       products,
-      totalProducts,
+      itemsPerPage: products.length,
+      currentPage: parseInt(page),
       totalPages: Math.ceil(totalProducts / limit),
-      currentPage: page,
+      totalItems: totalProducts,
     });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -83,24 +125,34 @@ export const list = async (req, res) => {
 };
 
 /**
- * @desc Get product by slug
- * @route /api/product/:slug
+ * @desc Get product by slug or ID
+ * @route /api/product/:identifier
  * @method GET
  */
 export const show = async (req, res) => {
-  const { slug } = req.params;
+  const { identifier } = req.params;
 
   try {
-    const product = await Product.findOne({ slug }).populate(
-      "category",
-      "name"
-    );
+    let product;
+
+    // Check if the identifier is a valid ObjectId (for ID lookup)
+    if (mongoose.isValidObjectId(identifier)) {
+      product = await Product.findById(identifier).populate("category", "name");
+    } else {
+      // Otherwise, treat it as a slug
+      product = await Product.findOne({ slug: identifier }).populate(
+        "category",
+        "name"
+      );
+    }
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
     res.status(200).json(product);
   } catch (error) {
-    console.error("Error fetching product by slug:", error);
+    console.error("Error fetching product by identifier:", error);
     res.status(500).json({
       message: "Error fetching product",
       error: error.message || error,
@@ -111,15 +163,15 @@ export const show = async (req, res) => {
 /**
  * @desc Update product
  * @route /api/product/:id
- * @method PATCH
+ * @method PUT
  */
 export const update = async (req, res) => {
   const { id } = req.params;
-  const { name, price, description, categoryId, stock } = req.body;
+  const { name, price, description, category, stock } = req.body;
 
   try {
     const { error } = productValidationSchema.validate(
-      { name, price, description, categoryId, stock },
+      { name, price, description, category, stock },
       { abortEarly: false }
     );
 
@@ -127,14 +179,14 @@ export const update = async (req, res) => {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const category = await Category.findById(categoryId);
-    if (!category) {
+    const categoryRef = await Category.findById(category);
+    if (!categoryRef) {
       return res.status(404).json({ message: "Category not found" });
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, price, description, category: categoryId, stock },
+      { name, price, description, category, stock },
       { new: true }
     ).populate("category", "name");
 

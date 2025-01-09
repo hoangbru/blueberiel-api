@@ -26,8 +26,16 @@ const orderSchema = new mongoose.Schema(
       default: "pending",
     },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true }
 );
+
+orderSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
+});
 
 const Order = mongoose.model("Order", orderSchema);
 export default Order;

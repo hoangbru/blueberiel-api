@@ -1,4 +1,5 @@
-import Category from "../models/category.js";
+import Category from "../models/category.model.js";
+import Product from "../models/product.model.js";
 import { categoryValidationSchema } from "../schemas/category.js";
 
 /**
@@ -81,9 +82,9 @@ export const show = async (req, res) => {
 };
 
 /**
- * @desc Update an existing category by ID
- * @route /api/categories/:id
- * @method PATCH
+ * @desc Update an existing category by ID and update related products
+ * @route PUT /api/category/:id
+ * @access Private (Admin only)
  */
 export const update = async (req, res) => {
   const { id } = req.params;
@@ -97,6 +98,7 @@ export const update = async (req, res) => {
       });
     }
 
+    // Update the category
     const category = await Category.findByIdAndUpdate(
       id,
       { name, description },
@@ -109,8 +111,14 @@ export const update = async (req, res) => {
       });
     }
 
+    // Update related products
+    await Product.updateMany(
+      { category: id },
+      { category: { _id: id, name: category.name } }
+    );
+
     res.status(200).json({
-      message: "Category updated successfully",
+      message: "Category and related products updated successfully",
       category,
     });
   } catch (error) {
@@ -123,24 +131,25 @@ export const update = async (req, res) => {
 };
 
 /**
- * @desc Delete a category by ID
- * @route /api/categories/:id
- * @method DELETE
+ * @desc Delete a category and remove the category reference from related products
+ * @route DELETE /api/categories/:id
+ * @access Public
  */
 export const remove = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Delete the category
     const category = await Category.findByIdAndDelete(id);
-
     if (!category) {
-      return res.status(404).json({
-        message: "Category not found",
-      });
+      return res.status(404).json({ message: "Category not found" });
     }
 
+    // Remove the category reference from related products
+    await Product.updateMany({ category: id }, { $set: { category: null } });
+
     res.status(200).json({
-      message: "Category deleted successfully",
+      message: "Category deleted and related products updated successfully",
     });
   } catch (error) {
     console.error("Error deleting category:", error);

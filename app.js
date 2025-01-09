@@ -3,9 +3,14 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 
-import { categoryRoutes, productRoutes, userRoutes } from "./routes/index.js";
+import {
+  categoryRoutes,
+  productRoutes,
+  uploadRoutes,
+  userRoutes,
+} from "./routes/index.js";
 import { connectDB } from "./config/db.js";
 
 dotenv.config();
@@ -25,7 +30,7 @@ const __dirname = path.dirname(__filename);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
-const routes = [categoryRoutes, productRoutes, userRoutes];
+const routes = [categoryRoutes, productRoutes, uploadRoutes, userRoutes];
 
 routes.forEach((router) => app.use("/api", router));
 

@@ -5,7 +5,7 @@ import {
   show,
   update,
   remove,
-} from "../controllers/categoryController.js";
+} from "../controllers/category.controller.js";
 
 const router = express.Router();
 
@@ -31,11 +31,11 @@ router.get("/categories", list);
 router.get("/category/:id", show);
 
 /**
- * @route PATCH /api/category/:id
+ * @route PUT /api/category/:id
  * @desc Update a specific category by ID
  * @access Private (Admin only)
  */
-router.patch("/category/:id", update);
+router.put("/category/:id", update);
 
 /**
  * @route DELETE /api/category/:id

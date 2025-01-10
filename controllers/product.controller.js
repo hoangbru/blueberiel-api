@@ -11,7 +11,6 @@ import { productValidationSchema } from "../schemas/product.js";
  */
 export const create = async (req, res) => {
   const { name, description, price, category, stock } = req.body;
-  console.log(req.body);
 
   try {
     const { error } = productValidationSchema.validate(
@@ -19,7 +18,7 @@ export const create = async (req, res) => {
       { abortEarly: false }
     );
     if (error) {
-      return res.json({
+      return res.status(400).json({
         message: error.details[0].message,
       });
     }
@@ -48,8 +47,8 @@ export const create = async (req, res) => {
 
 /**
  * @desc Get all products (with pagination, category filter, search, sort, and price range filter)
- * @route GET /api/products?page=&limit=&search=&sort=price&minPrice=&maxPrice=&category=
- * @access Public
+ * @route /api/products?page=&limit=&search=&sort=price&minPrice=&maxPrice=&category=
+ * @method GET
  */
 export const list = async (req, res) => {
   const {

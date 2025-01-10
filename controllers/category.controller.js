@@ -16,7 +16,7 @@ export const create = async (req, res) => {
       { abortEarly: false }
     );
     if (error) {
-      return res.json({
+      return res.status(400).json({
         message: error.details[0].message,
       });
     }
@@ -26,7 +26,11 @@ export const create = async (req, res) => {
       .status(201)
       .json({ message: "Category created successfully", category });
   } catch (error) {
-    res.status(500).json({ message: "Error creating category", error });
+    console.error("Error creating category:", error);
+    res.status(500).json({
+      message: "Error creating category",
+      error: error.message || error,
+    });
   }
 };
 
@@ -83,8 +87,8 @@ export const show = async (req, res) => {
 
 /**
  * @desc Update an existing category by ID and update related products
- * @route PUT /api/category/:id
- * @access Private (Admin only)
+ * @route /api/category/:id
+ * @method PUT
  */
 export const update = async (req, res) => {
   const { id } = req.params;
@@ -132,8 +136,8 @@ export const update = async (req, res) => {
 
 /**
  * @desc Delete a category and remove the category reference from related products
- * @route DELETE /api/categories/:id
- * @access Public
+ * @route /api/categories/:id
+ * @method DELETE
  */
 export const remove = async (req, res) => {
   const { id } = req.params;

@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { swaggerDocs } from "./utils/swagger.js";
+
 import {
   categoryRoutes,
   productRoutes,
@@ -18,13 +20,15 @@ connectDB();
 
 const app = express();
 const port = process.env.PORT || 3001; // Set default port if not defined
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Swagger documentation
+swaggerDocs(app, port);
 
 // Serve static files from the "uploads" folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

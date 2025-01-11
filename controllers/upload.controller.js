@@ -14,7 +14,7 @@ export const uploadImages = async (req, res) => {
 
   try {
     const uploadedImages = req.newFiles.map(
-      (filename) => `/uploads/${filename}`
+      (filename) => `${process.env.APP_URL}/uploads/${filename}`
     );
     const existingImages = req.existingFiles || [];
 
@@ -45,7 +45,7 @@ export const uploadImage = async (req, res) => {
     }
 
     // Add uploaded images to the product's images array
-    const imagePaths = req.files.map((file) => `/uploads/${file.filename}`);
+    const imagePaths = req.files.map((file) => `${process.env.APP_URL}/uploads/${file.filename}`);
 
     res.status(200).json({
       message: "Images uploaded successfully",

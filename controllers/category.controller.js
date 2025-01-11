@@ -167,6 +167,7 @@ export const remove = async (req, res) => {
       meta: {
         message: "Category deleted and related products updated successfully",
       },
+      data: { category: null },
     });
   } catch (error) {
     console.error("Error deleting category:", error);

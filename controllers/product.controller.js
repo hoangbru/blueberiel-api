@@ -10,11 +10,20 @@ import { productValidationSchema } from "../schemas/product.js";
  * @method POST
  */
 export const create = async (req, res) => {
-  const { name, description, price, category, stock } = req.body;
+  const {
+    name,
+    description,
+    price,
+    stock,
+    category,
+    rating,
+    variants,
+    images,
+  } = req.body;
 
   try {
     const { error } = productValidationSchema.validate(
-      { name, description, price, category, stock },
+      { name, description, price, stock, category, rating, variants, images },
       { abortEarly: false }
     );
     if (error) {
@@ -29,13 +38,16 @@ export const create = async (req, res) => {
       name,
       description,
       price,
-      category,
+      images: images ? images : [],
       stock,
-      images: req.files ? req.files.map((file) => file.path) : [],
+      category,
+      rating: rating ? rating : { average: 0, count: 0 },
+      variants: variants ? variants : [],
     });
 
     res.status(201).json({
-      meta: { message: "Product created successfully", data: product },
+      meta: { message: "Product created successfully" },
+      data: { product },
     });
   } catch (error) {
     console.error("Error creating product:", error);
@@ -49,8 +61,8 @@ export const create = async (req, res) => {
 };
 
 /**
- * @desc Get all products (with pagination, category filter, search, sort, and price range filter)
- * @route /api/products?page=&limit=&search=&sort=price&minPrice=&maxPrice=&category=
+ * @desc Get all products (with pagination, category filter, search, sort, price range filter, color, and size filter)
+ * @route /api/products?page=&limit=&search=&sort=&minPrice=&maxPrice=&category=&color=&size=
  * @method GET
  */
 export const list = async (req, res) => {
@@ -62,6 +74,8 @@ export const list = async (req, res) => {
     minPrice,
     maxPrice,
     category,
+    color,
+    size,
   } = req.query;
 
   try {
@@ -83,6 +97,15 @@ export const list = async (req, res) => {
     // Filter by category
     if (category) {
       query.category = category;
+    }
+
+    // Filter by color and size in variants
+    if (color || size) {
+      query.variants = {
+        $elemMatch: {},
+      };
+      if (color) query.variants.$elemMatch.color = color;
+      if (size) query.variants.$elemMatch.size = size;
     }
 
     // Sorting options
@@ -115,7 +138,7 @@ export const list = async (req, res) => {
       data: {
         products,
         pagination: {
-          itemsPerPage: products.length,
+          itemsPerPage: parseInt(limit),
           currentPage: parseInt(page),
           totalPages: Math.ceil(totalProducts / limit),
           totalItems: totalProducts,
@@ -161,7 +184,7 @@ export const show = async (req, res) => {
 
     res.status(200).json({
       meta: { message: "Product retrieved successfully" },
-      data: product,
+      data: { product },
     });
   } catch (error) {
     console.error("Error fetching product by identifier:", error);
@@ -181,11 +204,20 @@ export const show = async (req, res) => {
  */
 export const update = async (req, res) => {
   const { id } = req.params;
-  const { name, price, description, category, stock } = req.body;
+  const {
+    name,
+    description,
+    price,
+    stock,
+    category,
+    rating,
+    variants,
+    images,
+  } = req.body;
 
   try {
     const { error } = productValidationSchema.validate(
-      { name, price, description, category, stock },
+      { name, description, price, stock, category, rating, variants, images },
       { abortEarly: false }
     );
 
@@ -202,7 +234,7 @@ export const update = async (req, res) => {
 
     const product = await Product.findByIdAndUpdate(
       id,
-      { name, price, description, category, stock },
+      { name, description, price, stock, category, rating, variants, images },
       { new: true }
     ).populate("category", "name");
 
@@ -239,7 +271,10 @@ export const remove = async (req, res) => {
       return res.status(404).json({ meta: { message: "Product not found" } });
     }
 
-    res.status(200).json({ meta: { message: "Product deleted successfully" } });
+    res.status(200).json({
+      meta: { message: "Product deleted successfully" },
+      data: { product: null },
+    });
   } catch (error) {
     console.error("Error deleting product:", error);
     res.status(500).json({

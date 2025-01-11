@@ -19,11 +19,13 @@ export const create = async (req, res) => {
     );
     if (error) {
       return res.status(400).json({
-        message: error.details[0].message,
+        meta: {
+          message: error.details[0].message,
+        },
       });
     }
 
-    const newProduct = await Product.create({
+    const product = await Product.create({
       name,
       description,
       price,
@@ -33,14 +35,15 @@ export const create = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Product created successfully",
-      product: newProduct,
+      meta: { message: "Product created successfully", data: product },
     });
   } catch (error) {
     console.error("Error creating product:", error);
     res.status(500).json({
-      message: "Error creating product",
-      error: error.message || error,
+      meta: {
+        message: "Error creating product",
+        error: error.message || error,
+      },
     });
   }
 };
@@ -108,17 +111,24 @@ export const list = async (req, res) => {
 
     // Response
     res.status(200).json({
-      products,
-      itemsPerPage: products.length,
-      currentPage: parseInt(page),
-      totalPages: Math.ceil(totalProducts / limit),
-      totalItems: totalProducts,
+      meta: { message: "Products retrieved successfully" },
+      data: {
+        products,
+        pagination: {
+          itemsPerPage: products.length,
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(totalProducts / limit),
+          totalItems: totalProducts,
+        },
+      },
     });
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).json({
-      message: "Error fetching products",
-      error: error.message || error,
+      meta: {
+        message: "Error fetching products",
+        error: error.message || error,
+      },
     });
   }
 };
@@ -146,15 +156,20 @@ export const show = async (req, res) => {
     }
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ meta: { message: "Product not found" } });
     }
 
-    res.status(200).json(product);
+    res.status(200).json({
+      meta: { message: "Product retrieved successfully" },
+      data: product,
+    });
   } catch (error) {
     console.error("Error fetching product by identifier:", error);
     res.status(500).json({
-      message: "Error fetching product",
-      error: error.message || error,
+      meta: {
+        message: "Error fetching product",
+        error: error.message || error,
+      },
     });
   }
 };
@@ -175,32 +190,37 @@ export const update = async (req, res) => {
     );
 
     if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+      return res
+        .status(400)
+        .json({ meta: { message: error.details[0].message } });
     }
 
     const categoryRef = await Category.findById(category);
     if (!categoryRef) {
-      return res.status(404).json({ message: "Category not found" });
+      return res.status(404).json({ meta: { message: "Category not found" } });
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
+    const product = await Product.findByIdAndUpdate(
       id,
       { name, price, description, category, stock },
       { new: true }
     ).populate("category", "name");
 
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      return res.status(404).json({ meta: { message: "Product not found" } });
     }
 
-    res
-      .status(200)
-      .json({ message: "Product updated successfully", updatedProduct });
+    res.status(200).json({
+      meta: { message: "Product updated successfully" },
+      data: { product },
+    });
   } catch (error) {
     console.error("Error updating product:", error);
     res.status(500).json({
-      message: "Error updating product",
-      error: error.message || error,
+      meta: {
+        message: "Error updating product",
+        error: error.message || error,
+      },
     });
   }
 };
@@ -216,15 +236,17 @@ export const remove = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(id);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ meta: { message: "Product not found" } });
     }
 
-    res.status(200).json({ message: "Product deleted successfully" });
+    res.status(200).json({ meta: { message: "Product deleted successfully" } });
   } catch (error) {
     console.error("Error deleting product:", error);
     res.status(500).json({
-      message: "Error deleting product",
-      error: error.message || error,
+      meta: {
+        message: "Error deleting product",
+        error: error.message || error,
+      },
     });
   }
 };

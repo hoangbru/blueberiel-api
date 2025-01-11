@@ -120,6 +120,8 @@ router.get("/category/:id", show);
  *     responses:
  *       200:
  *         description: Category updated successfully
+ *       400:
+ *         description: Validation error
  *       404:
  *         description: Category not found
  *       500:

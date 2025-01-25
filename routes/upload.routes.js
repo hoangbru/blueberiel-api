@@ -11,21 +11,21 @@ const router = express.Router();
 /**
  * @route POST /api/upload/images
  * @desc Upload list of images
- * @access Private (Admin only)
+ * @access private (Admin only)
  */
 router.post("/upload/images", upload.array("images"), uploadImages);
 
 /**
  * @route POST /api/upload/images
  * @desc Upload an image
- * @access Private (Admin only)
+ * @access private (Admin only)
  */
 router.post("/upload/image", upload.single("image"), uploadImage);
 
 /**
  * @route DELETE /api/upload/images/:filename
  * @desc Delete an image
- * @access Private (Admin only)
+ * @access private (Admin only)
  */
 router.delete("/upload/images/:filename", deleteImage);
 

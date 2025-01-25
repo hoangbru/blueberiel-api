@@ -70,9 +70,6 @@ export const productValidationSchema = Joi.object({
         size: Joi.string().trim().required().messages({
           "string.empty": "Size is required.",
         }),
-        color: Joi.string().trim().required().messages({
-          "string.empty": "Color is required.",
-        }),
         stock: Joi.number().min(0).default(0).messages({
           "number.base": "Stock must be a number.",
           "number.min": "Stock must be greater than or equal to 0.",

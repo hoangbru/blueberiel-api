@@ -9,6 +9,7 @@ import { swaggerDocs } from "./utils/swagger.js";
 
 import {
   categoryRoutes,
+  paymentRoutes,
   productRoutes,
   uploadRoutes,
   userRoutes,
@@ -19,7 +20,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const port = process.env.PORT || 3001; // Set default port if not defined
+const port = process.env.PORT || 3001;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -34,7 +35,13 @@ swaggerDocs(app, port);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
-const routes = [categoryRoutes, productRoutes, uploadRoutes, userRoutes];
+const routes = [
+  categoryRoutes,
+  paymentRoutes,
+  productRoutes,
+  uploadRoutes,
+  userRoutes,
+];
 
 routes.forEach((router) => app.use("/api", router));
 

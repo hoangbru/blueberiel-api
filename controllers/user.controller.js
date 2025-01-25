@@ -5,6 +5,7 @@ import upload from "../utils/upload.js";
  * @desc Upload user avatar
  * @route /api/users/avatar
  * @method POST
+ * @access private
  */
 export const uploadAvatar = upload.single("avatar");
 
@@ -12,9 +13,17 @@ export const uploadAvatar = upload.single("avatar");
  * @desc Update user avatar
  * @route /api/users/avatar
  * @method POST
+ * @access private
  */
 export const updateAvatar = async (req, res) => {
   const { userId } = req.body;
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
+
   const avatar = req.file ? req.file.path : null;
 
   if (!avatar) {
@@ -49,30 +58,30 @@ export const updateAvatar = async (req, res) => {
 };
 
 /**
- * @desc Get all products (with pagination and category name)
- * @route /api/products?page=1&limit=10
+ * @desc Get all users (with pagination and category name)
+ * @route /api/users?page=1&limit=10
  * @method GET
+ * @access public
  */
 export const list = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
   try {
-    const products = await User.find()
+    const users = await User.find()
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("category", "name");
 
-    const totalProducts = await User.countDocuments();
+    const totalUsers = await User.countDocuments();
     res.status(200).json({
-      products,
-      totalProducts,
-      totalPages: Math.ceil(totalProducts / limit),
+      users,
+      totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
       currentPage: page,
     });
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching users:", error);
     res.status(500).json({
-      message: "Error fetching products",
+      message: "Error fetching users",
       error: error.message || error,
     });
   }
@@ -82,6 +91,7 @@ export const list = async (req, res) => {
  * @desc Get a single category by ID
  * @route /api/categories/:id
  * @method GET
+ * @access public
  */
 export const show = async (req, res) => {
   const { id } = req.params;
@@ -112,16 +122,26 @@ export const show = async (req, res) => {
  * @desc Update an existing category by ID
  * @route /api/categories/:id
  * @method PATCH
+ * @access private
  */
 export const update = async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
 
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
+
   try {
     const { error } = categoryValidationSchema.validate({ name, description });
     if (error) {
       return res.status(400).json({
-        message: error.details[0].message,
+        meta: {
+          message: "Validation errors",
+          errors: error.details.map((err) => err.message),
+        },
       });
     }
 
@@ -154,9 +174,16 @@ export const update = async (req, res) => {
  * @desc Delete a category by ID
  * @route /api/categories/:id
  * @method DELETE
+ * @access private
  */
 export const remove = async (req, res) => {
   const { id } = req.params;
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
 
   try {
     const category = await User.findByIdAndDelete(id);

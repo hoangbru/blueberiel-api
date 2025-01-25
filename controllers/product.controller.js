@@ -8,38 +8,42 @@ import { productValidationSchema } from "../schemas/product.js";
  * @desc Create a new product
  * @route /api/products
  * @method POST
+ * @access private
  */
 export const create = async (req, res) => {
-  const {
-    name,
-    description,
-    price,
-    stock,
-    category,
-    rating,
-    variants,
-    images,
-  } = req.body;
+  const { name, description, price, category, rating, variants, images } =
+    req.body;
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
 
   try {
     const { error } = productValidationSchema.validate(
-      { name, description, price, stock, category, rating, variants, images },
+      { name, description, price, category, rating, variants, images },
       { abortEarly: false }
     );
     if (error) {
       return res.status(400).json({
         meta: {
-          message: error.details[0].message,
+          message: "Validation errors",
+          errors: error.details.map((err) => err.message),
         },
       });
     }
+
+    const calculatedStock = Array.isArray(variants)
+      ? variants.reduce((total, variant) => total + (variant.stock || 0), 0)
+      : 0;
 
     const product = await Product.create({
       name,
       description,
       price,
       images: images ? images : [],
-      stock,
+      stock: calculatedStock,
       category,
       rating: rating ? rating : { average: 0, count: 0 },
       variants: variants ? variants : [],
@@ -61,9 +65,10 @@ export const create = async (req, res) => {
 };
 
 /**
- * @desc Get all products (with pagination, category filter, search, sort, price range filter, color, and size filter)
- * @route /api/products?page=&limit=&search=&sort=&minPrice=&maxPrice=&category=&color=&size=
+ * @desc Get all products (with pagination, category filter, search, sort, price range filter, and size filter)
+ * @route /api/products?page=&limit=&search=&sort=&minPrice=&maxPrice=&category=&size=
  * @method GET
+ * @access public
  */
 export const list = async (req, res) => {
   const {
@@ -74,7 +79,6 @@ export const list = async (req, res) => {
     minPrice,
     maxPrice,
     category,
-    color,
     size,
   } = req.query;
 
@@ -99,13 +103,13 @@ export const list = async (req, res) => {
       query.category = category;
     }
 
-    // Filter by color and size in variants
-    if (color || size) {
+    // Filter by size in variants
+    if (size) {
       query.variants = {
-        $elemMatch: {},
+        $elemMatch: {
+          size: size,
+        },
       };
-      if (color) query.variants.$elemMatch.color = color;
-      if (size) query.variants.$elemMatch.size = size;
     }
 
     // Sorting options
@@ -160,6 +164,7 @@ export const list = async (req, res) => {
  * @desc Get product by slug or ID
  * @route /api/product/:identifier
  * @method GET
+ * @access public
  */
 export const show = async (req, res) => {
   const { identifier } = req.params;
@@ -201,6 +206,7 @@ export const show = async (req, res) => {
  * @desc Update product
  * @route /api/product/:id
  * @method PUT
+ * @access private
  */
 export const update = async (req, res) => {
   const { id } = req.params;
@@ -215,6 +221,12 @@ export const update = async (req, res) => {
     images,
   } = req.body;
 
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
+
   try {
     const { error } = productValidationSchema.validate(
       { name, description, price, stock, category, rating, variants, images },
@@ -222,9 +234,12 @@ export const update = async (req, res) => {
     );
 
     if (error) {
-      return res
-        .status(400)
-        .json({ meta: { message: error.details[0].message } });
+      return res.status(400).json({
+        meta: {
+          message: "Validation errors",
+          errors: error.details.map((err) => err.message),
+        },
+      });
     }
 
     const categoryRef = await Category.findById(category);
@@ -261,9 +276,16 @@ export const update = async (req, res) => {
  * @desc Delete product
  * @route /api/product/:id
  * @method DELETE
+ * @access private
  */
 export const remove = async (req, res) => {
   const { id } = req.params;
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
 
   try {
     const product = await Product.findByIdAndDelete(id);

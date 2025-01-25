@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const orderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    products: [
+    items: [
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
@@ -20,7 +20,7 @@ const orderSchema = new mongoose.Schema(
       enum: ["cash_on_delivery", "online"],
       default: "cash_on_delivery",
     },
-    status: {
+    paymentStatus: {
       type: String,
       enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
       default: "pending",

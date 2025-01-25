@@ -4,8 +4,9 @@ import fsPromise from "fs/promises";
 
 /**
  * @desc Upload a list of images
- * @route POST /api/upload/images
- * @access Public
+ * @route /api/upload/images
+ * @method POST
+ * @access private
  */
 export const uploadImages = async (req, res) => {
   if (!req.files || req.files.length === 0) {
@@ -34,8 +35,9 @@ export const uploadImages = async (req, res) => {
 
 /**
  * @desc Upload an image
- * @route POST /api/upload/image
- * @access Public
+ * @route /api/upload/image
+ * @method POST
+ * @access private
  */
 export const uploadImage = async (req, res) => {
   try {
@@ -62,8 +64,9 @@ export const uploadImage = async (req, res) => {
 
 /**
  * @desc Delete an image
- * @route DELETE /api/upload/images/:filename
- * @access Public
+ * @route /api/upload/images/:filename
+ * @method DELETE
+ * @access private
  */
 export const deleteImage = async (req, res) => {
   const { filename } = req.params;

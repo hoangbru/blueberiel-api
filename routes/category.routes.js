@@ -44,7 +44,7 @@ const router = express.Router();
  *         description: Internal server error
  * @route POST /api/categories
  * @desc Create a new category
- * @access Private (Admin only)
+ * @access private (Admin only)
  */
 router.post("/categories", create);
 
@@ -61,7 +61,7 @@ router.post("/categories", create);
  *         description: Internal server error
  * @route GET /api/categories
  * @desc Get a list of all categories
- * @access Public
+ * @access public
  */
 router.get("/categories", list);
 
@@ -87,7 +87,7 @@ router.get("/categories", list);
  *         description: Internal server error
  * @route GET /api/category/:id
  * @desc Get a specific category by ID
- * @access Public
+ * @access public
  */
 router.get("/category/:id", show);
 
@@ -128,7 +128,7 @@ router.get("/category/:id", show);
  *         description: Internal server error
  * @route PUT /api/category/:id
  * @desc Update a specific category by ID
- * @access Private (Admin only)
+ * @access private (Admin only)
  */
 router.put("/category/:id", update);
 
@@ -154,7 +154,7 @@ router.put("/category/:id", update);
  *         description: Internal server error
  * @route DELETE /api/category/:id
  * @desc Delete a specific category by ID
- * @access Private (Admin only)
+ * @access private (Admin only)
  */
 router.delete("/category/:id", remove);
 

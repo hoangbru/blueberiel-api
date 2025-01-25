@@ -54,7 +54,8 @@ const router = express.Router();
  
  * @route POST /api/products
  * @desc Create a new product
- * @access Private (Admin only)*/
+ * @access private (Admin only)
+ */
 router.post("/products", create);
 
 /**
@@ -93,7 +94,7 @@ router.post("/products", create);
  *         description: Error fetching products
  * @route GET /api/products
  * @desc Get a list of all products
- * @access Public
+ * @access public
  */
 router.get("/products", list);
 
@@ -119,7 +120,7 @@ router.get("/products", list);
  *         description: Error fetching product
  * @route GET /api/product/:identifier
  * @desc Get a specific product by slug or ID
- * @access Public
+ * @access public
  */
 router.get("/product/:identifier", show);
 
@@ -162,7 +163,7 @@ router.get("/product/:identifier", show);
  *         description: Error updating product
  * @route PUT /api/product/:id
  * @desc Update a specific product by ID
- * @access Private (Admin only)
+ * @access private (Admin only)
  */
 router.put("/product/:id", update);
 
@@ -188,7 +189,7 @@ router.put("/product/:id", update);
  *         description: Error deleting product
  * @route DELETE /api/product/:id
  * @desc Delete a specific product by ID
- * @access Private (Admin only)
+ * @access private (Admin only)
  */
 router.delete("/product/:id", remove);
 

@@ -6,9 +6,16 @@ import { categoryValidationSchema } from "../schemas/category.js";
  * @desc Create a new category
  * @route /api/categories
  * @method POST
+ * @access private
  */
 export const create = async (req, res) => {
   const { name, description } = req.body;
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
 
   try {
     const { error } = categoryValidationSchema.validate(
@@ -17,7 +24,10 @@ export const create = async (req, res) => {
     );
     if (error) {
       return res.status(400).json({
-        meta: { message: error.details[0].message },
+        meta: {
+          message: "Validation errors",
+          errors: error.details.map((err) => err.message),
+        },
       });
     }
 
@@ -41,6 +51,7 @@ export const create = async (req, res) => {
  * @desc Get all categories
  * @route /api/categories
  * @method GET
+ * @access public
  */
 export const list = async (req, res) => {
   try {
@@ -64,6 +75,7 @@ export const list = async (req, res) => {
  * @desc Get a single category by ID
  * @route /api/categories/:id
  * @method GET
+ * @access public
  */
 export const show = async (req, res) => {
   const { id } = req.params;
@@ -96,16 +108,26 @@ export const show = async (req, res) => {
  * @desc Update an existing category by ID and update related products
  * @route /api/category/:id
  * @method PUT
+ * @access private
  */
 export const update = async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
 
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
+
   try {
     const { error } = categoryValidationSchema.validate({ name, description });
     if (error) {
       return res.status(400).json({
-        meta: { message: error.details[0].message },
+        meta: {
+          message: "Validation errors",
+          errors: error.details.map((err) => err.message),
+        },
       });
     }
 
@@ -147,9 +169,16 @@ export const update = async (req, res) => {
  * @desc Delete a category and remove the category reference from related products
  * @route /api/categories/:id
  * @method DELETE
+ * @access private
  */
 export const remove = async (req, res) => {
   const { id } = req.params;
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized user" },
+    });
+  }
 
   try {
     // Delete the category

@@ -12,6 +12,33 @@ const swaggerOptions = {
       version: "1.0.0",
       description: "API Documentation",
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+      responses: {
+        UnauthorizedError: {
+          description: "Token is missing or invalid",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  message: {
+                    type: "string",
+                    example: "Unauthorized",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     servers: [
       {
         url: `${process.env.APP_URL}`,

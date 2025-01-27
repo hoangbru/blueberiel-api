@@ -8,11 +8,11 @@ import { fileURLToPath } from "url";
 import { swaggerDocs } from "./utils/swagger.js";
 
 import {
+  authRoutes,
   categoryRoutes,
   paymentRoutes,
   productRoutes,
   uploadRoutes,
-  userRoutes,
 } from "./routes/index.js";
 import { connectDB } from "./config/db.js";
 
@@ -36,11 +36,11 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 const routes = [
+  authRoutes,
   categoryRoutes,
   paymentRoutes,
   productRoutes,
   uploadRoutes,
-  userRoutes,
 ];
 
 routes.forEach((router) => app.use("/api", router));

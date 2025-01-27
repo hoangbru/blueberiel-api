@@ -1,15 +1,57 @@
 import Joi from "joi";
 
 export const registerValidationSchema = Joi.object({
-  username: Joi.string().min(3).max(30).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-  phone: Joi.string().optional(),
-  address: Joi.string().optional(),
-  avatar: Joi.string().uri().optional(),
+  username: Joi.string().min(3).max(100).trim().required().messages({
+    "string.base": "Username must be a string",
+    "string.empty": "Username cannot be empty",
+    "string.min": "Username must be at least 3 characters long",
+    "string.max": "Username cannot exceed 100 characters",
+    "any.required": "Username is required",
+  }),
+  email: Joi.string().email().trim().lowercase().required().messages({
+    "string.email": "Please provide a valid email address",
+    "string.empty": "Email cannot be empty",
+    "any.required": "Email is required",
+  }),
+  password: Joi.string().min(6).required().messages({
+    "string.empty": "Password cannot be empty",
+    "string.min": "Password must be at least 6 characters long",
+    "any.required": "Password is required",
+  }),
+  phone: Joi.string()
+    .pattern(/^\+?[1-9]\d{1,14}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Please provide a valid phone number",
+    }),
+  address: Joi.string().trim().optional().messages({
+    "string.base": "Address must be a string",
+  }),
+  avatar: Joi.string()
+    .uri()
+    .optional()
+    .default(
+      "https://static1.s123-cdn-static-a.com/uploads/3107639/800_5e9de73574b25.png"
+    )
+    .messages({
+      "string.uri": "Avatar must be a valid URI",
+    }),
+  role: Joi.string().valid("user", "admin").default("user").messages({
+    "any.only": "Role must be either 'user' or 'admin'",
+  }),
+  status: Joi.string().valid("active", "inactive").default("active").messages({
+    "any.only": "Status must be either 'active' or 'inactive'",
+  }),
 });
 
 export const loginValidationSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
+  email: Joi.string().email().required().messages({
+    "string.email": "Please provide a valid email address",
+    "string.empty": "Email cannot be empty",
+    "any.required": "Email is required",
+  }),
+  password: Joi.string().required().messages({
+    "string.empty": "Password cannot be empty",
+    "any.required": "Password is required",
+  }),
 });

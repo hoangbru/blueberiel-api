@@ -1,5 +1,10 @@
 import express from "express";
-import { register, login, getProfile } from "../controllers/auth.controller.js";
+import {
+  register,
+  login,
+  getProfile,
+  refreshToken,
+} from "../controllers/auth.controller.js";
 import { protect } from "../middleware/protect.js";
 
 const router = express.Router();
@@ -24,7 +29,7 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               fullname:
  *                 type: string
  *                 example: johndoe
  *               email:
@@ -58,10 +63,10 @@ router.post("/register", register);
  *             properties:
  *               email:
  *                 type: string
- *                 example: johndoe@gmail.com
+ *                 example: johndoe@example.com
  *               password:
  *                 type: string
- *                 example: 123456
+ *                 example: Passw0rd!
  *     responses:
  *       200:
  *         description: User logged in successfully
@@ -70,7 +75,10 @@ router.post("/register", register);
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 accessToken:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                 refreshToken:
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       401:
@@ -82,7 +90,7 @@ router.post("/login", login);
 
 /**
  * @swagger
- * /api/user:
+ * /api/profile:
  *   get:
  *     summary: Get the profile of the logged-in user
  *     tags: [Auth]
@@ -99,7 +107,7 @@ router.post("/login", login);
  *                 id:
  *                   type: string
  *                   example: 64b7c86b5f1b2c3f4a1b2c4d
- *                 username:
+ *                 fullname:
  *                   type: string
  *                   example: johndoe
  *                 email:
@@ -113,6 +121,40 @@ router.post("/login", login);
  *       500:
  *         description: Internal server error
  */
-router.get("/user", protect, getProfile);
+router.get("/profile", protect, getProfile);
+
+/**
+ * @swagger
+ * /api/refresh-token:
+ *   post:
+ *     summary: Refresh the access token using a refresh token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *     responses:
+ *       200:
+ *         description: Access token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       401:
+ *         description: Invalid or expired refresh token
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/refresh-token", refreshToken);
 
 export default router;

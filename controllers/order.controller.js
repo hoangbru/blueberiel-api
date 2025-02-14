@@ -11,7 +11,7 @@ export const create = async (req, res) => {
 
   if (!req.user || !req.user.id) {
     return res.status(401).json({
-      meta: { message: "Unauthorized user" },
+      meta: { message: "Unauthorized user", errors: true },
     });
   }
 
@@ -46,7 +46,7 @@ export const create = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error creating order",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -72,7 +72,7 @@ export const list = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error fetching orders",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -80,8 +80,7 @@ export const list = async (req, res) => {
 
 /**
  * @desc Update order payment status
- * @route /api/orders/:orderId/status
- * @method PUT
+ * @route PUT /api/orders/:orderId/status
  * @access private
  */
 export const updateOrderStatus = async (req, res) => {
@@ -94,7 +93,7 @@ export const updateOrderStatus = async (req, res) => {
     )
   ) {
     return res.status(400).json({
-      meta: { message: "Invalid payment status" },
+      meta: { message: "Invalid payment status", errors: true },
     });
   }
 
@@ -107,7 +106,7 @@ export const updateOrderStatus = async (req, res) => {
 
     if (!order) {
       return res.status(404).json({
-        meta: { message: "Order not found" },
+        meta: { message: "Order not found", errors: true },
       });
     }
 
@@ -120,7 +119,7 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error updating payment status",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -143,7 +142,10 @@ export const cancelOrder = async (req, res) => {
 
     if (!order) {
       return res.status(404).json({
-        meta: { message: "Order not found or cannot be cancelled" },
+        meta: {
+          message: "Order not found or cannot be cancelled",
+          errors: true,
+        },
       });
     }
 
@@ -156,7 +158,7 @@ export const cancelOrder = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error cancelling order",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }

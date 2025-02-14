@@ -1,12 +1,11 @@
 import Joi from "joi";
 
 export const registerValidationSchema = Joi.object({
-  username: Joi.string().min(3).max(100).trim().required().messages({
-    "string.base": "Username must be a string",
-    "string.empty": "Username cannot be empty",
-    "string.min": "Username must be at least 3 characters long",
-    "string.max": "Username cannot exceed 100 characters",
-    "any.required": "Username is required",
+  fullname: Joi.string().min(3).max(100).trim().optional().messages({
+    "string.base": "Fullname must be a string",
+    "string.empty": "Fullname cannot be empty",
+    "string.min": "Fullname must be at least 3 characters long",
+    "string.max": "Fullname cannot exceed 100 characters",
   }),
   email: Joi.string().email().trim().lowercase().required().messages({
     "string.email": "Please provide a valid email address",

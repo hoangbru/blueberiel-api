@@ -25,7 +25,7 @@ const handleStripePayment = async (req, res) => {
   } catch (error) {
     console.error("Stripe payment error:", error);
     res.status(500).json({
-      meta: { message: "Stripe payment failed", error: error.message },
+      meta: { message: "Stripe payment failed", errors: error.message },
     });
   }
 };
@@ -55,7 +55,7 @@ const handlePayPalPayment = async (req, res) => {
   } catch (error) {
     console.error("PayPal payment error:", error);
     res.status(500).json({
-      meta: { message: "PayPal payment failed", error: error.message },
+      meta: { message: "PayPal payment failed", errors: error.message },
     });
   }
 };
@@ -134,7 +134,7 @@ const handleMomoPayment = async (req, res) => {
   } catch (error) {
     console.error("Momo payment error:", error);
     res.status(500).json({
-      meta: { message: "Momo payment failed", error: error.message },
+      meta: { message: "Momo payment failed", errors: error.message },
     });
   }
 };
@@ -160,7 +160,7 @@ export const checkout = async (req, res) => {
         break;
       default:
         return res.status(400).json({
-          meta: { message: "Invalid payment method" },
+          meta: { message: "Invalid payment method", errors: true },
         });
     }
 
@@ -183,6 +183,7 @@ export const checkout = async (req, res) => {
       return res.status(400).json({
         meta: {
           message: "Payment failed, please try again",
+          errors: true,
         },
       });
     }
@@ -191,7 +192,7 @@ export const checkout = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Payment processing failed",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }

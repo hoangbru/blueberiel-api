@@ -4,8 +4,7 @@ import { categoryValidationSchema } from "../schemas/category.js";
 
 /**
  * @desc Create a new category
- * @route /api/categories
- * @method POST
+ * @route POST /api/categories
  * @access private
  */
 export const create = async (req, res) => {
@@ -13,7 +12,7 @@ export const create = async (req, res) => {
 
   if (!req.user || !req.user.id) {
     return res.status(401).json({
-      meta: { message: "Unauthorized user" },
+      meta: { message: "Unauthorized user", errors: true },
     });
   }
 
@@ -41,7 +40,7 @@ export const create = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error creating category",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -49,8 +48,7 @@ export const create = async (req, res) => {
 
 /**
  * @desc Get all categories
- * @route /api/categories
- * @method GET
+ * @route GET /api/categories
  * @access public
  */
 export const list = async (req, res) => {
@@ -65,7 +63,7 @@ export const list = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error retrieving categories",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -73,8 +71,7 @@ export const list = async (req, res) => {
 
 /**
  * @desc Get a single category by ID
- * @route /api/categories/:id
- * @method GET
+ * @route GET /api/categories/:id
  * @access public
  */
 export const show = async (req, res) => {
@@ -85,7 +82,7 @@ export const show = async (req, res) => {
 
     if (!category) {
       return res.status(404).json({
-        meta: { message: "Category not found" },
+        meta: { message: "Category not found", errors: true },
       });
     }
 
@@ -98,7 +95,7 @@ export const show = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error retrieving category",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -106,8 +103,7 @@ export const show = async (req, res) => {
 
 /**
  * @desc Update an existing category by ID and update related products
- * @route /api/category/:id
- * @method PUT
+ * @route PUT /api/category/:id
  * @access private
  */
 export const update = async (req, res) => {
@@ -116,7 +112,7 @@ export const update = async (req, res) => {
 
   if (!req.user || !req.user.id) {
     return res.status(401).json({
-      meta: { message: "Unauthorized user" },
+      meta: { message: "Unauthorized user", errors: true },
     });
   }
 
@@ -140,7 +136,7 @@ export const update = async (req, res) => {
 
     if (!category) {
       return res.status(404).json({
-        meta: { message: "Category not found" },
+        meta: { message: "Category not found", errors: true },
       });
     }
 
@@ -159,7 +155,7 @@ export const update = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error updating category",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -167,8 +163,7 @@ export const update = async (req, res) => {
 
 /**
  * @desc Delete a category and remove the category reference from related products
- * @route /api/categories/:id
- * @method DELETE
+ * @route DELETE /api/categories/:id
  * @access private
  */
 export const remove = async (req, res) => {
@@ -176,7 +171,7 @@ export const remove = async (req, res) => {
 
   if (!req.user || !req.user.id) {
     return res.status(401).json({
-      meta: { message: "Unauthorized user" },
+      meta: { message: "Unauthorized user", errors: true },
     });
   }
 
@@ -185,7 +180,7 @@ export const remove = async (req, res) => {
     const category = await Category.findByIdAndDelete(id);
     if (!category) {
       return res.status(404).json({
-        meta: { message: "Category not found" },
+        meta: { message: "Category not found", errors: true },
       });
     }
 
@@ -203,7 +198,7 @@ export const remove = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error deleting category",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }

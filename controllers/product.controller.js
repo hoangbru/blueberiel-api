@@ -6,8 +6,7 @@ import { productValidationSchema } from "../schemas/product.js";
 
 /**
  * @desc Create a new product
- * @route /api/products
- * @method POST
+ * @route POST /api/products
  * @access private
  */
 export const create = async (req, res) => {
@@ -16,7 +15,7 @@ export const create = async (req, res) => {
 
   if (!req.user || !req.user.id) {
     return res.status(401).json({
-      meta: { message: "Unauthorized user" },
+      meta: { message: "Unauthorized user", errors: true },
     });
   }
 
@@ -58,7 +57,7 @@ export const create = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error creating product",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -66,8 +65,7 @@ export const create = async (req, res) => {
 
 /**
  * @desc Get all products (with pagination, category filter, search, sort, price range filter, and size filter)
- * @route /api/products?page=&limit=&search=&sort=&minPrice=&maxPrice=&category=&size=
- * @method GET
+ * @route GET /api/products?page=&limit=&search=&sort=&minPrice=&maxPrice=&category=&size=
  * @access public
  */
 export const list = async (req, res) => {
@@ -154,7 +152,7 @@ export const list = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error fetching products",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -162,8 +160,7 @@ export const list = async (req, res) => {
 
 /**
  * @desc Get product by slug or ID
- * @route /api/product/:identifier
- * @method GET
+ * @route GET /api/product/:identifier
  * @access public
  */
 export const show = async (req, res) => {
@@ -184,7 +181,9 @@ export const show = async (req, res) => {
     }
 
     if (!product) {
-      return res.status(404).json({ meta: { message: "Product not found" } });
+      return res
+        .status(404)
+        .json({ meta: { message: "Product not found", errors: true } });
     }
 
     res.status(200).json({
@@ -196,7 +195,7 @@ export const show = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error fetching product",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -204,8 +203,7 @@ export const show = async (req, res) => {
 
 /**
  * @desc Update product
- * @route /api/product/:id
- * @method PUT
+ * @route PUT /api/product/:id
  * @access private
  */
 export const update = async (req, res) => {
@@ -223,7 +221,7 @@ export const update = async (req, res) => {
 
   if (!req.user || !req.user.id) {
     return res.status(401).json({
-      meta: { message: "Unauthorized user" },
+      meta: { message: "Unauthorized user", errors: true },
     });
   }
 
@@ -244,7 +242,9 @@ export const update = async (req, res) => {
 
     const categoryRef = await Category.findById(category);
     if (!categoryRef) {
-      return res.status(404).json({ meta: { message: "Category not found" } });
+      return res
+        .status(404)
+        .json({ meta: { message: "Category not found", errors: true } });
     }
 
     const product = await Product.findByIdAndUpdate(
@@ -254,7 +254,9 @@ export const update = async (req, res) => {
     ).populate("category", "name");
 
     if (!product) {
-      return res.status(404).json({ meta: { message: "Product not found" } });
+      return res
+        .status(404)
+        .json({ meta: { message: "Product not found", errors: true } });
     }
 
     res.status(200).json({
@@ -266,7 +268,7 @@ export const update = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error updating product",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -274,8 +276,7 @@ export const update = async (req, res) => {
 
 /**
  * @desc Delete product
- * @route /api/product/:id
- * @method DELETE
+ * @route DELETE /api/product/:id
  * @access private
  */
 export const remove = async (req, res) => {
@@ -283,14 +284,16 @@ export const remove = async (req, res) => {
 
   if (!req.user || !req.user.id) {
     return res.status(401).json({
-      meta: { message: "Unauthorized user" },
+      meta: { message: "Unauthorized user", errors: true },
     });
   }
 
   try {
     const product = await Product.findByIdAndDelete(id);
     if (!product) {
-      return res.status(404).json({ meta: { message: "Product not found" } });
+      return res
+        .status(404)
+        .json({ meta: { message: "Product not found", errors: true } });
     }
 
     res.status(200).json({
@@ -302,7 +305,7 @@ export const remove = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error deleting product",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }

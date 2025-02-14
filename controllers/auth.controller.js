@@ -5,15 +5,18 @@ import {
   registerValidationSchema,
   loginValidationSchema,
 } from "../schemas/auth.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateToken.js";
 
 /**
  * @desc Register a new user
- * @route /api/auth/register
- * @method POST
+ * @route POST /api/register
  * @access Public
  */
 export const register = async (req, res) => {
-  const { username, email, password, phone, address, avatar } = req.body;
+  const { email, password } = req.body;
 
   try {
     const { error } = registerValidationSchema.validate(req.body, {
@@ -31,25 +34,21 @@ export const register = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
-        meta: { message: "Email is already in use" },
+        meta: { message: "Email is already in use", errors: true },
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      username,
       email,
       password: hashedPassword,
-      phone,
-      address,
-      avatar,
     });
 
     res.status(201).json({
       meta: { message: "User registered successfully" },
       data: {
-        user: { id: user.id, username: user.username, email: user.email },
+        user: { id: user.id, email: user.email },
       },
     });
   } catch (error) {
@@ -57,7 +56,7 @@ export const register = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error registering user",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
@@ -65,14 +64,14 @@ export const register = async (req, res) => {
 
 /**
  * @desc Login user
- * @route /api/auth/login
- * @method POST
+ * @route POST /api/login
  * @access Public
  */
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Validate request body
     const { error } = loginValidationSchema.validate(req.body, {
       abortEarly: false,
     });
@@ -85,45 +84,52 @@ export const login = async (req, res) => {
       });
     }
 
+    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
-        meta: { message: "Invalid email or password" },
+        meta: { message: "Invalid email or password", errors: true },
       });
     }
 
+    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({
-        meta: { message: "Invalid email or password" },
+        meta: { message: "Invalid email or password", errors: true },
       });
     }
 
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE }
-    );
+    // Generate access token & refresh token
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    res.status(200).json({
+    // Save refresh token in HTTP-Only Cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true, // Prevent XSS attacks
+      secure: process.env.NODE_ENV === "production", // Send only in HTTPS in production
+      sameSite: "Strict", // Prevent CSRF
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return res.status(200).json({
       meta: { message: "Login successful" },
       data: {
-        token,
-        user: { id: user.id, username: user.username, email: user.email },
+        accessToken,
+        user: { id: user.id, email: user.email },
       },
     });
   } catch (error) {
     console.error("Error logging in:", error);
-    res.status(500).json({
-      meta: { message: "Error logging in", error: error.message || error },
+    return res.status(500).json({
+      meta: { message: "Error logging in", errors: error.message || error },
     });
   }
 };
 
 /**
  * @desc Get user profile
- * @route /api/auth/profile
- * @method GET
+ * @route GET /api/profile
  * @access Private
  */
 export const getProfile = async (req, res) => {
@@ -131,7 +137,7 @@ export const getProfile = async (req, res) => {
     const user = await User.findById(req.user.id).select("-password");
     if (!user) {
       return res.status(404).json({
-        meta: { message: "User not found" },
+        meta: { message: "User not found", errors: true },
       });
     }
 
@@ -144,8 +150,63 @@ export const getProfile = async (req, res) => {
     res.status(500).json({
       meta: {
         message: "Error fetching profile",
-        error: error.message || error,
+        errors: error.message || error,
       },
     });
   }
+};
+
+/**
+ * @desc Renew Access Token
+ * @route POST /api/refresh
+ * @access Public
+ */
+export const refreshToken = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized", errors: true },
+    });
+  }
+
+  jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET,
+    async (err, decoded) => {
+      if (err) {
+        res.clearCookie("refreshToken");
+        return res.status(403).json({
+          meta: { message: "Forbidden - Invalid refresh token", errors: true },
+        });
+      }
+
+      try {
+        // Check if user exists
+        const user = await User.findById(decoded.id);
+        if (!user) {
+          res.clearCookie("refreshToken");
+          return res.status(403).json({
+            meta: { message: "Forbidden - User not found", errors: true },
+          });
+        }
+
+        // Generate new access token
+        const newAccessToken = generateAccessToken(user);
+
+        return res.status(200).json({
+          meta: { message: "Access token refreshed" },
+          data: { accessToken: newAccessToken },
+        });
+      } catch (error) {
+        console.error("Error refreshing token:", error);
+        return res.status(500).json({
+          meta: {
+            message: "Error refreshing token",
+            errors: error.message || error,
+          },
+        });
+      }
+    }
+  );
 };

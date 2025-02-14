@@ -6,7 +6,7 @@ import {
   update,
   remove,
 } from "../controllers/category.controller.js";
-import { admin, protect } from "../middleware/protect.js";
+import { isAdmin, protect } from "../middleware/protect.js";
 
 const router = express.Router();
 
@@ -66,7 +66,7 @@ router.post("/categories", create);
  * @desc Get a list of all categories
  * @access public
  */
-router.get("/categories", protect, admin, list);
+router.get("/categories", protect, isAdmin, list);
 
 /**
  * @swagger

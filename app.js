@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import path from "path";
+import cookieParser from "cookie-parser";
 import { fileURLToPath } from "url";
 
 import { swaggerDocs } from "./utils/swagger.js";
@@ -26,7 +27,13 @@ const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.APP_FE_URL,
+    credentials: true,
+  })
+);
 
 // Swagger documentation
 swaggerDocs(app, port);

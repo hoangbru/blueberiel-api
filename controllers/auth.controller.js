@@ -158,7 +158,7 @@ export const getProfile = async (req, res) => {
 
 /**
  * @desc Renew Access Token
- * @route POST /api/refresh
+ * @route POST /api/refresh-token
  * @access Public
  */
 export const refreshToken = async (req, res) => {
@@ -192,11 +192,15 @@ export const refreshToken = async (req, res) => {
         }
 
         // Generate new access token
-        const newAccessToken = generateAccessToken(user);
+        const accessToken = jwt.sign(
+          { id: user.id },
+          process.env.ACCESS_TOKEN_SECRET,
+          { expiresIn: process.env.ACCESS_TOKEN_EXPIRE }
+        );
 
         return res.status(200).json({
           meta: { message: "Access token refreshed" },
-          data: { accessToken: newAccessToken },
+          data: { accessToken },
         });
       } catch (error) {
         console.error("Error refreshing token:", error);
@@ -209,4 +213,28 @@ export const refreshToken = async (req, res) => {
       }
     }
   );
+};
+
+/**
+ * @desc Logout user (clear refresh token)
+ * @route POST /api/logout
+ * @access Public
+ */
+export const logout = (req, res) => {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+    });
+
+    return res.status(200).json({
+      meta: { message: "Logout successful" },
+    });
+  } catch (error) {
+    console.error("Error logging out:", error);
+    return res.status(500).json({
+      meta: { message: "Error logging out", errors: error.message || error },
+    });
+  }
 };

@@ -4,6 +4,7 @@ import {
   login,
   getProfile,
   refreshToken,
+  logout,
 } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/protect.js";
 
@@ -156,5 +157,19 @@ router.get("/profile", protect, getProfile);
  *         description: Internal server error
  */
 router.post("/refresh-token", refreshToken);
+
+/**
+ * @swagger
+ * /api/logout:
+ *   post:
+ *     summary: Log out a user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/logout", logout);
 
 export default router;

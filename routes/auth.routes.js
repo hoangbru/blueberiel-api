@@ -30,7 +30,7 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               fullname:
+ *               fullName:
  *                 type: string
  *                 example: johndoe
  *               email:
@@ -82,7 +82,7 @@ router.post("/register", register);
  *                 refreshToken:
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *       401:
+ *       400:
  *         description: Invalid email or password
  *       500:
  *         description: Internal server error
@@ -108,7 +108,7 @@ router.post("/login", login);
  *                 id:
  *                   type: string
  *                   example: 64b7c86b5f1b2c3f4a1b2c4d
- *                 fullname:
+ *                 fullName:
  *                   type: string
  *                   example: johndoe
  *                 email:
@@ -122,7 +122,7 @@ router.post("/login", login);
  *       500:
  *         description: Internal server error
  */
-router.get("/profile", protect, getProfile);
+router.get("/profile", getProfile);
 
 /**
  * @swagger

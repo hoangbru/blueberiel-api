@@ -10,12 +10,6 @@ import { categoryValidationSchema } from "../schemas/category.js";
 export const create = async (req, res) => {
   const { name, description } = req.body;
 
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({
-      meta: { message: "Unauthorized user", errors: true },
-    });
-  }
-
   try {
     const { error } = categoryValidationSchema.validate(
       { name, description },
@@ -110,12 +104,6 @@ export const update = async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
 
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({
-      meta: { message: "Unauthorized user", errors: true },
-    });
-  }
-
   try {
     const { error } = categoryValidationSchema.validate({ name, description });
     if (error) {
@@ -168,12 +156,6 @@ export const update = async (req, res) => {
  */
 export const remove = async (req, res) => {
   const { id } = req.params;
-
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({
-      meta: { message: "Unauthorized user", errors: true },
-    });
-  }
 
   try {
     // Delete the category

@@ -9,12 +9,6 @@ import { orderValidationSchema } from "../schemas/order.js";
 export const create = async (req, res) => {
   const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
 
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({
-      meta: { message: "Unauthorized user", errors: true },
-    });
-  }
-
   try {
     const { error } = orderValidationSchema.validate(
       { user: req.user.id, items, shippingAddress, paymentMethod, totalAmount },

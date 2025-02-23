@@ -18,8 +18,14 @@ export const protect = async (req, res, next) => {
     req.user = await User.findById(decoded.id).select("-password");
 
     if (!req.user) {
-      return res.status(401).json({
+      return res.status(404).json({
         meta: { message: "User not found, not authorized" },
+      });
+    }
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        meta: { message: "Access forbidden: Admins only" },
       });
     }
 
@@ -42,23 +48,4 @@ export const protect = async (req, res, next) => {
       meta: { message: "Internal server error", error: error.message },
     });
   }
-};
-
-/**
- * Middleware to check if user is admin
- */
-export const isAdmin = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({
-      meta: { message: "Not authenticated" },
-    });
-  }
-
-  if (req.user.role !== "admin") {
-    return res.status(403).json({
-      meta: { message: "Access forbidden: Admins only" },
-    });
-  }
-
-  next();
 };

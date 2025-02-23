@@ -13,12 +13,6 @@ export const create = async (req, res) => {
   const { name, description, price, category, rating, variants, images } =
     req.body;
 
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({
-      meta: { message: "Unauthorized user", errors: true },
-    });
-  }
-
   try {
     const { error } = productValidationSchema.validate(
       { name, description, price, category, rating, variants, images },
@@ -219,12 +213,6 @@ export const update = async (req, res) => {
     images,
   } = req.body;
 
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({
-      meta: { message: "Unauthorized user", errors: true },
-    });
-  }
-
   try {
     const { error } = productValidationSchema.validate(
       { name, description, price, stock, category, rating, variants, images },
@@ -281,12 +269,6 @@ export const update = async (req, res) => {
  */
 export const remove = async (req, res) => {
   const { id } = req.params;
-
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({
-      meta: { message: "Unauthorized user", errors: true },
-    });
-  }
 
   try {
     const product = await Product.findByIdAndDelete(id);

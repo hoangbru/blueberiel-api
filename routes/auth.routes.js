@@ -82,7 +82,7 @@ router.post("/register", register);
  *                 refreshToken:
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *       401:
+ *       400:
  *         description: Invalid email or password
  *       500:
  *         description: Internal server error
@@ -122,7 +122,7 @@ router.post("/login", login);
  *       500:
  *         description: Internal server error
  */
-router.get("/profile", protect, getProfile);
+router.get("/profile", getProfile);
 
 /**
  * @swagger

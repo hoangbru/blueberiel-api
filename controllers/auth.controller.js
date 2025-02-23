@@ -87,7 +87,7 @@ export const login = async (req, res) => {
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({
+      return res.status(400).json({
         meta: { message: "Invalid email or password", errors: true },
       });
     }
@@ -95,7 +95,7 @@ export const login = async (req, res) => {
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({
+      return res.status(400).json({
         meta: { message: "Invalid email or password", errors: true },
       });
     }
@@ -133,8 +133,17 @@ export const login = async (req, res) => {
  * @access Private
  */
 export const getProfile = async (req, res) => {
+  let token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({
+      meta: { message: "Unauthorized" },
+    });
+  }
+  
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(404).json({
         meta: { message: "User not found", errors: true },

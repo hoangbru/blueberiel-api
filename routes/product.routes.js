@@ -6,6 +6,7 @@ import {
   update,
   remove,
 } from "../controllers/product.controller.js";
+import { protect } from "../middleware/protect.js";
 
 const router = express.Router();
 
@@ -56,7 +57,7 @@ const router = express.Router();
  * @desc Create a new product
  * @access private (Admin only)
  */
-router.post("/products", create);
+router.post("/products", protect, create);
 
 /**
  * @swagger
@@ -165,7 +166,7 @@ router.get("/product/:identifier", show);
  * @desc Update a specific product by ID
  * @access private (Admin only)
  */
-router.put("/product/:id", update);
+router.put("/product/:id", protect, update);
 
 /**
  * @swagger
@@ -191,6 +192,6 @@ router.put("/product/:id", update);
  * @desc Delete a specific product by ID
  * @access private (Admin only)
  */
-router.delete("/product/:id", remove);
+router.delete("/product/:id", protect, remove);
 
 export default router;

@@ -1,13 +1,12 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import path from "path";
 import cookieParser from "cookie-parser";
+import mongoose from "mongoose";
 import { fileURLToPath } from "url";
+import path from "path";
 
 import { swaggerDocs } from "./utils/swagger.js";
-
 import {
   authRoutes,
   categoryRoutes,
@@ -18,6 +17,8 @@ import {
 import { connectDB } from "./config/db.js";
 
 dotenv.config();
+// MongoDB Configuration
+mongoose.set("strictQuery", true);
 connectDB();
 
 const app = express();
@@ -51,9 +52,6 @@ const routes = [
 ];
 
 routes.forEach((router) => app.use("/api", router));
-
-// MongoDB Configuration
-mongoose.set("strictQuery", true);
 
 // Start the server
 app.listen(port, () => {

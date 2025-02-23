@@ -6,7 +6,7 @@ import {
   update,
   remove,
 } from "../controllers/category.controller.js";
-import { isAdmin, protect } from "../middleware/protect.js";
+import { protect } from "../middleware/protect.js";
 
 const router = express.Router();
 
@@ -47,7 +47,7 @@ const router = express.Router();
  * @desc Create a new category
  * @access private (Admin only)
  */
-router.post("/categories", create);
+router.post("/categories", protect, create);
 
 /**
  * @swagger
@@ -66,7 +66,7 @@ router.post("/categories", create);
  * @desc Get a list of all categories
  * @access public
  */
-router.get("/categories", protect, isAdmin, list);
+router.get("/categories", list);
 
 /**
  * @swagger
@@ -133,7 +133,7 @@ router.get("/category/:id", show);
  * @desc Update a specific category by ID
  * @access private (Admin only)
  */
-router.put("/category/:id", update);
+router.put("/category/:id", protect, update);
 
 /**
  * @swagger
@@ -159,6 +159,6 @@ router.put("/category/:id", update);
  * @desc Delete a specific category by ID
  * @access private (Admin only)
  */
-router.delete("/category/:id", remove);
+router.delete("/category/:id", protect, remove);
 
 export default router;

@@ -10,6 +10,7 @@ import { swaggerDocs } from "./utils/swagger.js";
 import {
   authRoutes,
   categoryRoutes,
+  orderRoutes,
   paymentRoutes,
   productRoutes,
   uploadRoutes,
@@ -46,6 +47,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const routes = [
   authRoutes,
   categoryRoutes,
+  orderRoutes,
   paymentRoutes,
   productRoutes,
   uploadRoutes,

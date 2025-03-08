@@ -6,7 +6,7 @@ import {
   refreshToken,
   logout,
 } from "../controllers/auth.controller.js";
-import { protect } from "../middleware/protect.js";
+import { authenticate, protect } from "../middleware/protect.js";
 
 const router = express.Router();
 
@@ -122,7 +122,7 @@ router.post("/login", login);
  *       500:
  *         description: Internal server error
  */
-router.get("/profile", getProfile);
+router.get("/profile", authenticate, getProfile);
 
 /**
  * @swagger

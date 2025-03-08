@@ -2,24 +2,45 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    fullName: {
+      type: String,
+      trim: true,
+      minlength: 3,
+      maxlength: 100,
+    },
+    phone: { type: String, match: /^\+?[1-9]\d{1,14}$/ },
     items: [
       {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
-        },
+        productId: { type: mongoose.Schema.Types.ObjectId, required: true },
+        name: { type: String, required: true },
+        price: { type: Number, required: true },
         quantity: { type: Number, required: true },
+        size: { type: String, required: true },
       },
     ],
-    totalAmount: { type: Number, required: true },
     shippingAddress: { type: String, required: true },
+    deliveryMethod: {
+      type: String,
+      enum: ["standard", "express"],
+      default: "standard",
+    },
     paymentMethod: {
       type: String,
-      enum: ["cash_on_delivery", "online"],
+      enum: ["cash_on_delivery", "card"],
       default: "cash_on_delivery",
     },
+    orderComment: {
+      type: String,
+      trim: true,
+      minlength: 3,
+      maxlength: 500,
+    },
+    totalAmount: { type: Number, required: true },
     paymentStatus: {
       type: String,
       enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],

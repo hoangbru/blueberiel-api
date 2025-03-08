@@ -1,4 +1,4 @@
-import { Order } from "../models/orderModel.js";
+import Order from "../models/order.model.js";
 import { orderValidationSchema } from "../schemas/order.js";
 
 /**
@@ -7,11 +7,44 @@ import { orderValidationSchema } from "../schemas/order.js";
  * @access private
  */
 export const create = async (req, res) => {
-  const { items, shippingAddress, paymentMethod, totalAmount } = req.body;
+  const {
+    fullName,
+    phone,
+    items,
+    shippingAddress,
+    deliveryMethod,
+    paymentMethod,
+    orderComment,
+  } = req.body;
 
   try {
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        meta: { message: "Invalid items data" },
+      });
+    }
+
+    let totalAmount = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    if (deliveryMethod === "express") {
+      totalAmount += 2;
+    }
+
     const { error } = orderValidationSchema.validate(
-      { user: req.user.id, items, shippingAddress, paymentMethod, totalAmount },
+      {
+        userId: req.user.id,
+        fullName,
+        phone,
+        items,
+        shippingAddress,
+        deliveryMethod,
+        paymentMethod,
+        orderComment,
+        totalAmount,
+      },
       { abortEarly: false }
     );
     if (error) {
@@ -24,10 +57,14 @@ export const create = async (req, res) => {
     }
 
     const order = await Order.create({
-      user: req.user.id,
+      userId: req.user.id,
+      fullName,
+      phone,
       items,
       shippingAddress,
+      deliveryMethod,
       paymentMethod,
+      orderComment,
       totalAmount,
     });
 
@@ -53,7 +90,7 @@ export const create = async (req, res) => {
  */
 export const list = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user.id }).sort({
+    const orders = await Order.find({ userId: req.user.id }).sort({
       createdAt: -1,
     });
 
@@ -93,7 +130,7 @@ export const updateOrderStatus = async (req, res) => {
 
   try {
     const order = await Order.findOneAndUpdate(
-      { id: orderId, user: req.user.id },
+      { id: orderId, userId: req.user.id },
       { paymentStatus },
       { new: true }
     );
@@ -129,7 +166,7 @@ export const cancelOrder = async (req, res) => {
 
   try {
     const order = await Order.findOneAndUpdate(
-      { id: orderId, user: req.user.id, paymentStatus: "pending" },
+      { id: orderId, userId: req.user.id, paymentStatus: "pending" },
       { paymentStatus: "cancelled" },
       { new: true }
     );

@@ -80,11 +80,11 @@ router.post("/orders", authenticate, create);
  *       500:
  *         description: Server error
  */
-router.get("/orders", list);
+router.get("/orders", authenticate, list);
 
 /**
  * @swagger
- * /api/orders/{orderId}/status:
+ * /api/order/{orderId}/status:
  *   put:
  *     summary: Update the payment status of an order
  *     tags: [Orders]
@@ -116,11 +116,11 @@ router.get("/orders", list);
  *       500:
  *         description: Server error
  */
-router.put("/:orderId/status", protect, updateOrderStatus);
+router.put("/order/:orderId/status", authenticate, updateOrderStatus);
 
 /**
  * @swagger
- * /api/orders/{orderId}/cancel:
+ * /api/order/{orderId}/cancel:
  *   put:
  *     summary: Cancel an order (only if it's pending)
  *     tags: [Orders]
@@ -140,6 +140,6 @@ router.put("/:orderId/status", protect, updateOrderStatus);
  *       500:
  *         description: Server error
  */
-router.put("/:orderId/cancel", authenticate, cancelOrder);
+router.put("/order/:orderId/cancel", authenticate, cancelOrder);
 
 export default router;

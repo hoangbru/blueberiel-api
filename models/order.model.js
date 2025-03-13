@@ -18,6 +18,7 @@ const orderSchema = new mongoose.Schema(
       {
         productId: { type: mongoose.Schema.Types.ObjectId, required: true },
         name: { type: String, required: true },
+        image: { type: String, required: true },
         price: { type: Number, required: true },
         quantity: { type: Number, required: true },
         size: { type: String, required: true },
@@ -46,6 +47,7 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
       default: "pending",
     },
+    trackingNumber: { type: String, unique: true, sparse: true },
   },
   { timestamps: true }
 );

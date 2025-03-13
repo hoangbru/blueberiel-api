@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 import Order from "../models/order.model.js";
 import { orderValidationSchema } from "../schemas/order.js";
 
@@ -111,7 +113,7 @@ export const list = async (req, res) => {
 
 /**
  * @desc Update order payment status
- * @route PUT /api/orders/:orderId/status
+ * @route PUT /api/order/:orderId/status
  * @access private
  */
 export const updateOrderStatus = async (req, res) => {
@@ -129,9 +131,15 @@ export const updateOrderStatus = async (req, res) => {
   }
 
   try {
+    const updateData = { paymentStatus };
+
+    if (paymentStatus === "shipped") {
+      updateData.trackingNumber = `BBR-${uuidv4().slice(0, 8).toUpperCase()}`;
+    }
+
     const order = await Order.findOneAndUpdate(
-      { id: orderId, userId: req.user.id },
-      { paymentStatus },
+      { _id: orderId, userId: req.user.id },
+      updateData,
       { new: true }
     );
 
@@ -166,7 +174,7 @@ export const cancelOrder = async (req, res) => {
 
   try {
     const order = await Order.findOneAndUpdate(
-      { id: orderId, userId: req.user.id, paymentStatus: "pending" },
+      { _id: orderId, userId: req.user.id, paymentStatus: "pending" },
       { paymentStatus: "cancelled" },
       { new: true }
     );

@@ -48,6 +48,12 @@ export const orderValidationSchema = Joi.object({
           "any.required": `"name" is a required field`,
         }),
 
+        image: Joi.string().required().uri().messages({
+          "string.base": `"image" should be a string`,
+          "any.required": `"image" is a required field`,
+          "string.uri": `"image" must be a valid URI`,
+        }),
+
         price: Joi.number().min(0).required().messages({
           "number.base": `"price" should be a number`,
           "number.min": `"price" should be at least 0`,
@@ -76,7 +82,7 @@ export const orderValidationSchema = Joi.object({
       "array.min": `"items" should have at least one item`,
       "any.required": `"items" is a required field`,
     }),
-    
+
   shippingAddress: Joi.string().required().messages({
     "string.base": `"shippingAddress" should be a string`,
     "string.empty": `"shippingAddress" cannot be an empty field`,
@@ -115,4 +121,7 @@ export const orderValidationSchema = Joi.object({
     .messages({
       "any.only": `"paymentStatus" must be one of ["pending", "confirmed", "shipped", "delivered", "cancelled"]`,
     }),
+  trackingNumber: Joi.string().allow(null, "").messages({
+    "string.base": `"trackingNumber" should be a string`,
+  }),
 });

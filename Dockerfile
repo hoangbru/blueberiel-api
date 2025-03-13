@@ -1,20 +1,20 @@
-# Sử dụng Node.js 18
+# Use Node.js 18
 FROM node:18
 
-# Thiết lập thư mục làm việc trong container
+# Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Sao chép package.json và package-lock.json
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Cài đặt các dependencies
+# Install dependencies
 RUN npm install
 
-# Sao chép toàn bộ mã nguồn vào container
+# Copy the entire source code into the container
 COPY . .
 
-# Expose port 3000
+# Expose port 8080
 EXPOSE 8080
 
-# Chạy lệnh khởi động ứng dụng
+# Run the application start command
 CMD ["npm", "start"]
